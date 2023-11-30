@@ -13,8 +13,10 @@ class ProductController {
 
   ProductController({required this.productRepository});
 
-  Future<List<ProductModel>> getProducts() async {
-    return await productRepository.getProducts();
+  Future<List<ProductModel>> getProducts(
+      {int? page, bool? completed, int? limit}) async {
+    return await productRepository.getProducts(
+        page: page, completed: completed, limit: limit);
   }
 
   Future<ProductModel> getProduct(String productId) async {
