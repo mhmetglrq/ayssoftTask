@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_product_app/core/constants/constants.dart';
@@ -8,22 +9,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/product_model.dart';
 
 final productRepositoryProvider = Provider(
-  (ref) => ProductRepository(),
+  (ref) => ProductRepository(dio: Dio()),
 );
 
 class ProductRepository {
-  ProductRepository();
+  ProductRepository({required this.dio});
+  final Dio dio;
 
-  Future<List<ProductModel>> getProducts() async {
+  Future<List<ProductModel>> getProducts(
+      {int? page, bool? completed, int? limit}) async {
     List<ProductModel> products = [];
     try {
       final response = await http.get(
-        Uri.parse(Constants.productApiBaseUrl),
+        Uri.parse(
+          '${Constants.productApiBaseUrl}${page != null ? '?completed=$completed&page=$page&limit=$limit' : ''}',
+        ),
       );
       if (response.statusCode == 200) {
-        // Gelen veriyi map'e çeviriyoruz
         final responseData = await compute(jsonDecode, response.body);
-        // Map'teki verileri model'e çeviriyoruz
         for (var product in responseData) {
           products.add(ProductModel.fromJson(product));
         }

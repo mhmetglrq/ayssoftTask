@@ -16,9 +16,48 @@ class ProductList extends ConsumerStatefulWidget {
 }
 
 class _ProductListState extends ConsumerState<ProductList> {
-  bool isLoading = true;
-  int itemCount = 12;
-  final ScrollController _scrollController = ScrollController();
+  bool isLoading = false;
+  final ScrollController scrollController = ScrollController();
+  List<ProductModel> products = [];
+  int page = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    scrollController.addListener(_scrollListener);
+    fetchData();
+  }
+
+  @override
+  void dispose() {
+    scrollController.removeListener(_scrollListener);
+    super.dispose();
+  }
+
+  fetchData() async {
+    final newProducts = await ref
+        .read(productControllerProvider)
+        .getProducts(page: page, limit: 12, completed: true);
+    setState(() {
+      products.addAll(newProducts);
+    });
+  }
+
+  Future<void> _scrollListener() async {
+    if (isLoading) return;
+    if (scrollController.position.pixels ==
+        scrollController.position.maxScrollExtent) {
+      setState(() {
+        isLoading = true;
+      });
+      page += 1;
+      await fetchData();
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,84 +66,93 @@ class _ProductListState extends ConsumerState<ProductList> {
           padding: context.paddingAllDefault,
           child: Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Ürünler',
-                    style: context.textTheme.titleMedium?.copyWith(
-                      color: AppColors.primary,
-                      fontSize: context.dynamicWidth(0.06),
-                    ),
+              _searchBar(context),
+              Expanded(
+                child: GridView.builder(
+                  controller: scrollController,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: context.dynamicWidth(0.02),
+                    mainAxisSpacing: context.dynamicHeight(0.02),
                   ),
-                  CircleAvatar(
-                    backgroundColor: AppColors.primary,
-                    radius: context.dynamicWidth(0.05),
-                    child: IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.shopping_cart,
-                        color: AppColors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              FutureBuilder<List<ProductModel>>(
-                future: ref.read(productControllerProvider).getProducts(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    int lengthDiff = snapshot.data!.length % itemCount;
-                    final products = snapshot.data!;
-
-                    _scrollController.addListener(() {
-                      if (_scrollController.position.pixels ==
-                          _scrollController.position.maxScrollExtent) {
-                        setState(() {
-                          if (itemCount < products.length - lengthDiff) {
-                            itemCount += 12;
-                            isLoading = true;
-                          } else {
-                            itemCount = products.length - 1;
-                          }
-                        });
-                      }
-                    });
-                    isLoading = false;
-                    return Expanded(
-                      child: GridView.builder(
-                        controller: _scrollController,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: context.dynamicWidth(0.02),
-                          mainAxisSpacing: context.dynamicHeight(0.02),
-                        ),
-                        itemCount: itemCount + 1,
-                        itemBuilder: (BuildContext context, int index) {
-                          final product = products[index];
-                          return ProductItemCard(product: product);
-                        },
-                      ),
-                    );
-                  } else if (snapshot.connectionState ==
-                      ConnectionState.waiting) {
-                    return const Expanded(child: ShimmerGridview());
-                  }
-                  return Center(
-                    child: Text(
-                      snapshot.error.toString(),
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: AppColors.primary,
-                        fontSize: context.dynamicWidth(0.04),
-                      ),
-                    ),
-                  );
-                },
+                  itemCount: isLoading ? products.length + 1 : products.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index < products.length) {
+                      final product = products[index];
+                      return ProductItemCard(product: product);
+                    } else {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                  },
+                ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Row _searchBar(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: TextFormField(
+            onChanged: (query) {
+              setState(
+                () {
+                  ref.read(productControllerProvider).getProducts().then(
+                      (value) => products = value
+                          .where((element) => element.name!
+                              .toLowerCase()
+                              .contains(query.toLowerCase()))
+                          .toList());
+                  if (query.isEmpty) {
+                    page = 1;
+                    fetchData();
+                  }
+                },
+              );
+            },
+            style: context.textTheme.bodyMedium?.copyWith(
+              color: AppColors.primary,
+              fontSize: context.dynamicWidth(0.04),
+            ),
+            decoration: InputDecoration(
+              contentPadding: context.paddingHorizontalLow,
+              hintText: 'Search',
+              hintStyle: context.textTheme.bodyMedium?.copyWith(
+                color: AppColors.primary,
+                fontSize: context.dynamicWidth(0.04),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: AppColors.fillColor,
+              prefixIcon: const Icon(
+                Icons.search,
+                color: AppColors.violet,
+              ),
+            ),
+          ),
+        ),
+        SizedBox(width: context.dynamicWidth(0.02)),
+        Container(
+          width: context.dynamicWidth(0.1),
+          height: context.dynamicHeight(0.06),
+          decoration: BoxDecoration(
+            color: AppColors.violet,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: const Icon(
+            Icons.filter_alt_outlined,
+            color: AppColors.white,
+          ),
+        ),
+      ],
     );
   }
 }
