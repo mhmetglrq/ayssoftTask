@@ -37,11 +37,15 @@ class _ProductListState extends ConsumerState<ProductList> {
                       fontSize: context.dynamicWidth(0.06),
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.shopping_cart,
-                      color: AppColors.primary,
+                  CircleAvatar(
+                    backgroundColor: AppColors.primary,
+                    radius: context.dynamicWidth(0.05),
+                    child: IconButton(
+                      onPressed: () {},
+                      icon: const Icon(
+                        Icons.shopping_cart,
+                        color: AppColors.white,
+                      ),
                     ),
                   ),
                 ],

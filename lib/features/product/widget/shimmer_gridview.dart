@@ -21,6 +21,7 @@ class ShimmerGridview extends StatelessWidget {
       itemBuilder: (BuildContext context, int index) {
         return Card(
           color: Colors.white,
+          surfaceTintColor: AppColors.white,
           elevation: 15,
           shadowColor: AppColors.primary,
           shape: RoundedRectangleBorder(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_product_app/config/extensions/context_extension.dart';
 
 import '../../../config/items/colors.dart';
+import '../../../config/routes/route_names.dart';
 import '../../../core/models/product_model.dart';
 
 class ProductItemCard extends StatelessWidget {
@@ -16,12 +17,15 @@ class ProductItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () => Navigator.pushNamed(context, RouteNames.productDetails,
+          arguments: {"productId": product.id}),
       child: Card(
         elevation: 15,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
         ),
+        color: Colors.white,
+        surfaceTintColor: AppColors.white,
         shadowColor: AppColors.primary,
         child: Stack(
           children: [
