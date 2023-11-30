@@ -16,4 +16,8 @@ class ProductController {
   Future<List<ProductModel>> getProducts() async {
     return await productRepository.getProducts();
   }
+
+  Future<ProductModel> getProduct(String productId) async {
+    return await productRepository.getProduct(productId);
+  }
 }

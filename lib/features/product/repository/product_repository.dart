@@ -36,4 +36,25 @@ class ProductRepository {
     }
     return products;
   }
+
+  Future<ProductModel> getProduct(String productId) async {
+    ProductModel product = ProductModel();
+    try {
+      final response = await http.get(
+        Uri.parse('${Constants.productApiBaseUrl}/$productId'),
+      );
+      if (response.statusCode == 200) {
+        // Gelen veriyi map'e çeviriyoruz
+        final responseData = await compute(jsonDecode, response.body);
+        // Map'teki verileri model'e çeviriyoruz
+        product = ProductModel.fromJson(responseData);
+        return product;
+      } else {
+        debugPrint('Hata kodu: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Hata: $e');
+    }
+    return product;
+  }
 }
