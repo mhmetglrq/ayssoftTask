@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_product_app/config/extensions/context_extension.dart';
+import 'package:flutter_product_app/config/routes/route_names.dart';
+import 'package:flutter_product_app/config/routes/routes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -31,7 +33,7 @@ class CustomAppbar extends ConsumerWidget {
           ),
           const Spacer(),
           GestureDetector(
-            onTap: () {},
+            onTap: () => Navigator.pushNamed(context, RouteNames.cart),
             child: CircleAvatar(
               backgroundColor: AppColors.white,
               radius: context.dynamicWidth(0.065),

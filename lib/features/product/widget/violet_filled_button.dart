@@ -7,8 +7,10 @@ class VioletFilledButton extends StatelessWidget {
   const VioletFilledButton({
     super.key,
     required this.onPressed,
+    required this.title,
   });
   final Function()? onPressed;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,7 @@ class VioletFilledButton extends StatelessWidget {
         child: TextButton(
           onPressed: onPressed,
           child: Text(
-            'Add to Cart',
+            title,
             style: context.textTheme.bodyMedium?.copyWith(
               color: AppColors.white,
               fontSize: context.dynamicWidth(0.04),

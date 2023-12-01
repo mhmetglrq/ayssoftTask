@@ -1,12 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../items/colors.dart';
+
 @immutable
 final class AppTheme {
   const AppTheme();
 
   ThemeData get themeData {
     return ThemeData(
+        scaffoldBackgroundColor: AppColors.white,
+        appBarTheme: AppBarTheme(
+          color: Colors.white,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: AppColors.titleBlack),
+          centerTitle: true,
+          titleTextStyle: GoogleFonts.montserrat(
+            fontWeight: FontWeight.w500,
+            wordSpacing: 2,
+            color: Colors.black,
+          ),
+        ),
         useMaterial3: true,
         textTheme: TextTheme(
           bodyMedium: GoogleFonts.montserrat(

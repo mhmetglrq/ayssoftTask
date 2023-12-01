@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_product_app/core/models/cart_item_model.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
@@ -104,10 +105,37 @@ class ProductRepository {
     return products;
   }
 
-  Future<void> saveProductToCart(Map<dynamic, dynamic> product) async {
+  Future<void> saveProductToCart(ProductModel product) async {
     try {
       final cartBox = Hive.box("cart");
-      await cartBox.add(product);
+      if (cartBox.length > 0 && !cartBox.containsKey(product.id)) {
+        CartItemModel cartItem = CartItemModel(
+          id: product.id,
+          name: product.name,
+          image: product.image,
+          price: product.price,
+          quantity: 1,
+          brand: product.brand,
+          model: product.model,
+        );
+        await cartBox.put(cartItem.id, cartItem.toMap());
+      } else if (cartBox.length > 0 && cartBox.containsKey(product.id)) {
+        CartItemModel cartItem = CartItemModel.fromMap(cartBox.get(product.id));
+        cartItem.quantity = cartItem.quantity! + 1;
+        await cartBox.put(product.id, cartItem.toMap());
+        return;
+      } else {
+        CartItemModel cartItem = CartItemModel(
+          id: product.id,
+          name: product.name,
+          image: product.image,
+          price: product.price,
+          quantity: 1,
+          brand: product.brand,
+          model: product.model,
+        );
+        await cartBox.put(cartItem.id, cartItem.toMap());
+      }
     } catch (e) {
       debugPrint('Hata: $e');
     }

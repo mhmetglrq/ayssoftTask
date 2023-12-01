@@ -76,7 +76,7 @@ class ProductItemCard extends StatelessWidget {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          product.price!,
+                          product.price!.toString(),
                           style: context.textTheme.bodyMedium?.copyWith(
                             color: Colors.white,
                             fontSize: context.dynamicWidth(0.04),
