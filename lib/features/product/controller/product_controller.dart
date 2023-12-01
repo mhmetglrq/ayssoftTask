@@ -31,7 +31,7 @@ class ProductController {
     return await productRepository.getCartProducts();
   }
 
-  Future<void> saveProductToCart(Map<dynamic, dynamic> product) async {
+  Future<void> saveProductToCart(ProductModel product) async {
     return await productRepository.saveProductToCart(product);
   }
 

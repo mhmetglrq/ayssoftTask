@@ -130,7 +130,7 @@ class ProductDetails extends ConsumerWidget {
                       onPressed: () async {
                         ref
                             .read(productControllerProvider)
-                            .saveProductToCart(product.toMap());
+                            .saveProductToCart(product);
                         var result = await ref
                             .read(productControllerProvider)
                             .getCartProducts();
@@ -139,6 +139,7 @@ class ProductDetails extends ConsumerWidget {
                             .refresh(productControllerProvider)
                             .getCartProductCount();
                       },
+                      title: 'Add to Cart',
                     ),
                   ),
                 ],
