@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_product_app/core/models/cart_item_model.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_product_app/core/constants/constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,22 +21,20 @@ class ProductRepository {
       {int? page, bool? completed, int? limit}) async {
     List<ProductModel> products = [];
     try {
-      final response = await http.get(
-        Uri.parse(
-          '${Constants.productApiBaseUrl}${page != null ? '?completed=$completed&page=$page&limit=$limit' : ''}',
-        ),
+      final response = await dio.get(
+        '${Constants.productApiBaseUrl}/products${page != null ? '?completed=false&page=$page&limit=$limit' : ''}',
       );
       if (response.statusCode == 200) {
-        final responseData = await compute(jsonDecode, response.body);
+        final responseData = response.data;
         for (var product in responseData) {
           products.add(ProductModel.fromJson(product));
         }
         return products;
       } else {
-        debugPrint('Hata kodu: ${response.statusCode}');
+        debugPrint('Error code: ${response.statusCode}');
       }
     } catch (e) {
-      debugPrint('Hata: $e');
+      debugPrint('Error: $e');
     }
     return products;
   }
@@ -45,17 +42,14 @@ class ProductRepository {
   Future<ProductModel> getProduct(String productId) async {
     ProductModel product = ProductModel();
     try {
-      final response = await http.get(
-        Uri.parse('${Constants.productApiBaseUrl}/$productId'),
-      );
+      final response =
+          await dio.get('${Constants.productApiBaseUrl}/products/$productId');
       if (response.statusCode == 200) {
-        // Gelen veriyi map'e çeviriyoruz
-        final responseData = await compute(jsonDecode, response.body);
-        // Map'teki verileri model'e çeviriyoruz
+        final responseData = await response.data;
         product = ProductModel.fromJson(responseData);
         return product;
       } else {
-        debugPrint('Hata kodu: ${response.statusCode}');
+        debugPrint('Error code: ${response.statusCode}');
       }
     } catch (e) {
       debugPrint('Hata: $e');
@@ -66,41 +60,20 @@ class ProductRepository {
   Future<List<ProductModel>> searchProducts(String query) async {
     List<ProductModel> products = [];
     try {
-      final response = await http.get(
-        Uri.parse('${Constants.productApiBaseUrl}?q=$query'),
+      final response = await dio.get(
+        '${Constants.productApiBaseUrl}/products?name=$query',
       );
       if (response.statusCode == 200) {
-        final responseData = await compute(jsonDecode, response.body);
+        final responseData = response.data;
         for (var product in responseData) {
           products.add(ProductModel.fromJson(product));
         }
         return products;
       } else {
-        debugPrint('Hata kodu: ${response.statusCode}');
+        debugPrint('Error code: ${response.statusCode}');
       }
     } catch (e) {
-      debugPrint('Hata: $e');
-    }
-    return products;
-  }
-
-  Future<List<ProductModel>> getProductsByBrand(String brand) async {
-    List<ProductModel> products = [];
-    try {
-      final response = await http.get(
-        Uri.parse('${Constants.productApiBaseUrl}?brand=$brand'),
-      );
-      if (response.statusCode == 200) {
-        final responseData = await compute(jsonDecode, response.body);
-        for (var product in responseData) {
-          products.add(ProductModel.fromJson(product));
-        }
-        return products;
-      } else {
-        debugPrint('Hata kodu: ${response.statusCode}');
-      }
-    } catch (e) {
-      debugPrint('Hata: $e');
+      debugPrint('Error: $e');
     }
     return products;
   }
@@ -108,6 +81,7 @@ class ProductRepository {
   Future<void> saveProductToCart(ProductModel product) async {
     try {
       final cartBox = Hive.box("cart");
+      final cartCountBox = Hive.box("cartCount");
       if (cartBox.length > 0 && !cartBox.containsKey(product.id)) {
         CartItemModel cartItem = CartItemModel(
           id: product.id,
@@ -119,10 +93,13 @@ class ProductRepository {
           model: product.model,
         );
         await cartBox.put(cartItem.id, cartItem.toMap());
+        await cartCountBox.add(product.toMap());
       } else if (cartBox.length > 0 && cartBox.containsKey(product.id)) {
         CartItemModel cartItem = CartItemModel.fromMap(cartBox.get(product.id));
         cartItem.quantity = cartItem.quantity! + 1;
         await cartBox.put(product.id, cartItem.toMap());
+        await cartCountBox.add(product.toMap());
+
         return;
       } else {
         CartItemModel cartItem = CartItemModel(
@@ -135,61 +112,19 @@ class ProductRepository {
           model: product.model,
         );
         await cartBox.put(cartItem.id, cartItem.toMap());
+        await cartCountBox.add(product.toMap());
       }
     } catch (e) {
-      debugPrint('Hata: $e');
-    }
-  }
-
-  Future<List<ProductModel>> getCartProducts() async {
-    List<ProductModel> products = [];
-    try {
-      final cartBox = Hive.box("cart");
-      for (var i = 0; i < cartBox.length; i++) {
-        products.add(ProductModel.fromMap(cartBox.getAt(i)));
-      }
-
-      return products;
-    } catch (e) {
-      debugPrint('Hata:---- $e');
-    }
-    return products;
-  }
-
-  Future<void> deleteProductFromCart(int index) async {
-    try {
-      final cartBox = Hive.box("cart");
-      await cartBox.deleteAt(index);
-    } catch (e) {
-      debugPrint('Hata: $e');
-    }
-  }
-
-  Future<void> deleteAllProductsFromCart() async {
-    try {
-      final cartBox = Hive.box("cart");
-      await cartBox.clear();
-    } catch (e) {
-      debugPrint('Hata: $e');
-    }
-  }
-
-  Future<void> updateProductFromCart(
-      int index, Map<dynamic, dynamic> product) async {
-    try {
-      final cartBox = Hive.box("cart");
-      await cartBox.putAt(index, product);
-    } catch (e) {
-      debugPrint('Hata: $e');
+      debugPrint('Error: $e');
     }
   }
 
   int getCartProductCount() {
     try {
-      final cartBox = Hive.box("cart");
-      return cartBox.length;
+      final cartCountBox = Hive.box("cartCount");
+      return cartCountBox.length;
     } catch (e) {
-      debugPrint('Hata: $e');
+      debugPrint('Error: $e');
     }
     return 0;
   }

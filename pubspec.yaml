@@ -39,7 +39,6 @@ dependencies:
   cached_network_image: ^3.3.0
   shimmer: ^3.0.0
   google_fonts: ^6.1.0
-  http: ^1.1.0
   flutter_svg: ^2.0.9
   hive: ^2.2.3
   hive_flutter: ^1.1.0

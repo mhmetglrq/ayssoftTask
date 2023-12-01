@@ -28,33 +28,24 @@ class Cart extends ConsumerStatefulWidget {
 
 class _CartState extends ConsumerState<Cart> {
   double cartSubtotal = 0;
-  double cartDeliveryFee = 20;
   double cartTotal = 0;
   bool isEmpty = false;
 
   @override
   void initState() {
-    super.initState();
     getCartTotal();
+
+    super.initState();
   }
 
   void getCartTotal() {
     Future.delayed(Duration.zero, () async {
       final cartBox = Hive.box("cart");
-      if (cartBox.length == 0) {
-        setState(() {
-          isEmpty = true;
-        });
-      } else {
-        setState(() {
-          isEmpty = false;
-        });
-      }
       for (var i = 0; i < cartBox.length; i++) {
         CartItemModel cartItem = CartItemModel.fromMap(cartBox.getAt(i));
         cartSubtotal =
             cartSubtotal + (double.parse(cartItem.price!) * cartItem.quantity!);
-        cartTotal = cartSubtotal + cartDeliveryFee;
+        cartTotal = cartSubtotal;
       }
       setState(() {});
     });
@@ -84,18 +75,21 @@ class _CartState extends ConsumerState<Cart> {
                     if (snapshot.hasData) {
                       List<CartItemModel> cartItems = snapshot.data!;
                       if (cartItems.isEmpty) {
-                        return Column(
-                          children: [
-                            Lottie.asset(
-                              "assets/json/empty.json",
-                              height: context.dynamicHeight(0.5),
-                            ),
-                            Text(
-                              "Cart is empty!\n Let's add some products",
-                              style: context.textTheme.titleLarge,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                        return Padding(
+                          padding: context.paddingVerticalDefault,
+                          child: Column(
+                            children: [
+                              Lottie.asset(
+                                "assets/json/empty.json",
+                                height: context.dynamicHeight(0.2),
+                              ),
+                              Text(
+                                "Cart is empty!\n Let's add some products",
+                                style: context.textTheme.titleMedium,
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
                         );
                       }
                       return ListView.builder(
@@ -114,33 +108,20 @@ class _CartState extends ConsumerState<Cart> {
                       );
                     }
                   }),
-              !isEmpty
-                  ? Column(
-                      children: [
-                        const LeftTitle(title: "Delivery Address"),
-                        const DeliveryAddress(),
-                        const LeftTitle(
-                          title: "Payment Method",
-                        ),
-                        const PaymentMethod(),
-                        const LeftTitle(
-                          title: "Order Info",
-                        ),
-                        OrderInfo(
-                            cartSubtotal: cartSubtotal,
-                            cartDeliveryFee: cartDeliveryFee,
-                            cartTotal: cartTotal),
-                        VioletFilledButton(
-                          onPressed: () async {
-                            ref
-                                .refresh(productControllerProvider)
-                                .getCartProductCount();
-                          },
-                          title: "Checkout",
-                        ),
-                      ],
-                    )
-                  : const SizedBox(),
+              const LeftTitle(title: "Delivery Address"),
+              const DeliveryAddress(),
+              const LeftTitle(
+                title: "Payment Method",
+              ),
+              const PaymentMethod(),
+              const LeftTitle(
+                title: "Order Info",
+              ),
+              OrderInfo(cartSubtotal: cartSubtotal, cartTotal: cartTotal),
+              VioletFilledButton(
+                onPressed: () async {},
+                title: "Checkout",
+              ),
             ],
           ),
         ),
@@ -200,19 +181,18 @@ class _CartState extends ConsumerState<Cart> {
                         Row(
                           children: [
                             IconButton(
-                              onPressed: () {
-                                ref
+                              onPressed: () async {
+                                await ref
                                     .refresh(cartControllerProvider)
                                     .decreaseProductQuantity(cartItem.id!);
                                 ref
                                     .refresh(productControllerProvider)
                                     .getCartProductCount();
-
                                 setState(() {});
                                 if (cartItem.quantity == 1) {
                                   cartSubtotal = cartSubtotal -
                                       (1) * double.parse(cartItem.price!);
-                                  cartTotal = cartSubtotal + cartDeliveryFee;
+                                  cartTotal = cartSubtotal;
                                   setState(() {
                                     isEmpty = true;
                                   });
@@ -220,7 +200,7 @@ class _CartState extends ConsumerState<Cart> {
                                   cartSubtotal = cartSubtotal -
                                       (1) * double.parse(cartItem.price!);
                                 }
-                                cartTotal = cartSubtotal + cartDeliveryFee;
+                                cartTotal = cartSubtotal;
                               },
                               icon: SvgPicture.asset(
                                   ImageConstants.arrowDown.toSvg),
@@ -233,16 +213,22 @@ class _CartState extends ConsumerState<Cart> {
                               ),
                             ),
                             IconButton(
-                              onPressed: () {
-                                ref
+                              onPressed: () async {
+                                await ref
                                     .refresh(cartControllerProvider)
                                     .increaseProductQuantity(cartItem.id!);
                                 ref
                                     .refresh(productControllerProvider)
                                     .getCartProductCount();
+
+                                var box = Hive.box("cartCount");
+                                for (var element in box.values) {
+                                  print(element);
+                                }
+
                                 cartSubtotal = cartSubtotal +
                                     (1) * double.parse(cartItem.price!);
-                                cartTotal = cartSubtotal + cartDeliveryFee;
+                                cartTotal = cartSubtotal;
                                 setState(() {});
                               },
                               icon: SvgPicture.asset(
@@ -261,7 +247,7 @@ class _CartState extends ConsumerState<Cart> {
                             cartSubtotal = cartSubtotal -
                                 ((cartItem.quantity!) *
                                     double.parse(cartItem.price!));
-                            cartTotal = cartSubtotal + cartDeliveryFee;
+                            cartTotal = cartSubtotal;
                             setState(() {});
 
                             if (count == 0) {

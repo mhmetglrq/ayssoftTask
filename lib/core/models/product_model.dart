@@ -42,7 +42,7 @@ class ProductModel {
     return data;
   }
 
-  Map<String, dynamic> toMap() {
+  Map<dynamic, dynamic> toMap() {
     return <String, dynamic>{
       'createdAt': createdAt,
       'name': name,

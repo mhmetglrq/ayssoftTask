@@ -128,13 +128,10 @@ class ProductDetails extends ConsumerWidget {
                     width: context.dynamicWidth(1),
                     child: VioletFilledButton(
                       onPressed: () async {
-                        ref
+                        await ref
                             .read(productControllerProvider)
                             .saveProductToCart(product);
-                        var result = await ref
-                            .read(productControllerProvider)
-                            .getCartProducts();
-                        print(result);
+
                         ref
                             .refresh(productControllerProvider)
                             .getCartProductCount();

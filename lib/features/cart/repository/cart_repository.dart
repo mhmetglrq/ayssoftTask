@@ -27,10 +27,12 @@ class CartRepository {
   Future<void> increaseProductQuantity(String cartItemId) async {
     try {
       final cartBox = Hive.box("cart");
+      final cartCountBox = Hive.box("cartCount");
       if (cartBox.length > 0 && cartBox.containsKey(cartItemId)) {
         CartItemModel cartItem = CartItemModel.fromMap(cartBox.get(cartItemId));
         cartItem.quantity = cartItem.quantity! + 1;
         await cartBox.put(cartItem.id, cartItem.toMap());
+        await cartCountBox.add(cartItem.toMap());
         return;
       }
     } catch (e) {
@@ -41,14 +43,17 @@ class CartRepository {
   Future<void> decreaseProductQuantity(String cartItemId) async {
     try {
       final cartBox = Hive.box("cart");
+      final cartCountBox = Hive.box("cartCount");
       if (cartBox.length > 0 && cartBox.containsKey(cartItemId)) {
         CartItemModel cartItem = CartItemModel.fromMap(cartBox.get(cartItemId));
         if (cartItem.quantity! > 1) {
           cartItem.quantity = cartItem.quantity! - 1;
           await cartBox.put(cartItem.id, cartItem.toMap());
+          await cartCountBox.deleteAt(cartCountBox.length - 1);
           return;
         } else {
           await cartBox.delete(cartItemId);
+          await cartCountBox.delete(cartCountBox.length - 1);
           return;
         }
       }
@@ -60,8 +65,10 @@ class CartRepository {
   Future<void> deleteProductFromCart(String cartItemId) async {
     try {
       final cartBox = Hive.box("cart");
+      final cartCountBox = Hive.box("cartCount");
       if (cartBox.length > 0 && cartBox.containsKey(cartItemId)) {
         await cartBox.delete(cartItemId);
+        await cartCountBox.deleteAt(cartCountBox.length - 1);
         return;
       }
     } catch (e) {

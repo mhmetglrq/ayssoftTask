@@ -27,10 +27,6 @@ class ProductController {
     return await productRepository.searchProducts(query);
   }
 
-  Future<List<ProductModel>> getCartProducts() async {
-    return await productRepository.getCartProducts();
-  }
-
   Future<void> saveProductToCart(ProductModel product) async {
     return await productRepository.saveProductToCart(product);
   }
