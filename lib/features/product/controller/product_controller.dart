@@ -22,4 +22,20 @@ class ProductController {
   Future<ProductModel> getProduct(String productId) async {
     return await productRepository.getProduct(productId);
   }
+
+  Future<List<ProductModel>> searchProducts(String query) async {
+    return await productRepository.searchProducts(query);
+  }
+
+  Future<List<ProductModel>> getCartProducts() async {
+    return await productRepository.getCartProducts();
+  }
+
+  Future<void> saveProductToCart(Map<dynamic, dynamic> product) async {
+    return await productRepository.saveProductToCart(product);
+  }
+
+  int getCartProductCount() {
+    return productRepository.getCartProductCount();
+  }
 }
