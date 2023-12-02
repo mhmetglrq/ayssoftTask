@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_product_app/config/extensions/context_extension.dart';
 import 'package:flutter_product_app/config/items/colors.dart';
 import 'package:flutter_product_app/core/models/product_model.dart';
+import 'package:flutter_product_app/features/cart/widget/left_title.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../controller/product_controller.dart';
@@ -41,9 +42,11 @@ class _ProductListState extends ConsumerState<ProductList> {
     final newProducts = await ref
         .read(productControllerProvider)
         .getProducts(page: page, limit: 12, completed: true);
-    setState(() {
-      products.addAll(newProducts);
-    });
+    if (mounted) {
+      setState(() {
+        products.addAll(newProducts);
+      });
+    }
   }
 
   Future<void> _scrollListener() async {
@@ -68,8 +71,28 @@ class _ProductListState extends ConsumerState<ProductList> {
         child: Padding(
           padding: context.paddingAllDefault,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                "Welcome",
+                style: context.textTheme.headlineMedium?.copyWith(
+                  color: AppColors.titleBlack,
+                  fontSize: context.dynamicWidth(0.09),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                "Let's find your favorite products",
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.titleBlack,
+                  fontSize: context.dynamicWidth(0.04),
+                ),
+              ),
               _searchBar(context),
+              Padding(
+                padding: context.paddingVerticalLow,
+                child: const LeftTitle(title: 'Products'),
+              ),
               Expanded(
                 child: GridView.builder(
                   controller: scrollController,
@@ -77,6 +100,7 @@ class _ProductListState extends ConsumerState<ProductList> {
                     crossAxisCount: 2,
                     crossAxisSpacing: context.dynamicWidth(0.02),
                     mainAxisSpacing: context.dynamicHeight(0.02),
+                    childAspectRatio: 0.7,
                   ),
                   itemCount: isLoading ? products.length + 1 : products.length,
                   itemBuilder: (BuildContext context, int index) {
@@ -96,105 +120,110 @@ class _ProductListState extends ConsumerState<ProductList> {
     );
   }
 
-  Row _searchBar(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: TextFormField(
-            onChanged: (query) {
-              setState(
-                () {
-                  ref.read(productControllerProvider).getProducts().then(
-                      (value) => products = value
-                          .where((element) => element.name!
-                              .toLowerCase()
-                              .contains(query.toLowerCase()))
-                          .toList());
-                  if (query.isEmpty) {
-                    page = 1;
-                    fetchData();
-                  }
-                },
-              );
-            },
-            style: context.textTheme.bodyMedium?.copyWith(
-              color: AppColors.primary,
-              fontSize: context.dynamicWidth(0.04),
-            ),
-            decoration: InputDecoration(
-              contentPadding: context.paddingHorizontalLow,
-              hintText: 'Search',
-              hintStyle: context.textTheme.bodyMedium?.copyWith(
+  Padding _searchBar(BuildContext context) {
+    return Padding(
+      padding: context.paddingVerticalDefault,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: TextFormField(
+              onChanged: (query) {
+                setState(
+                  () {
+                    ref
+                        .read(productControllerProvider)
+                        .searchProducts(query)
+                        .then((value) => products = value);
+                    scrollController.removeListener(_scrollListener);
+                    if (query.isEmpty) {
+                      scrollController.addListener(_scrollListener);
+                      page = 1;
+                      fetchData();
+                    }
+                  },
+                );
+              },
+              style: context.textTheme.bodyMedium?.copyWith(
                 color: AppColors.primary,
                 fontSize: context.dynamicWidth(0.04),
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide.none,
-              ),
-              filled: true,
-              fillColor: AppColors.fillColor,
-              prefixIcon: const Icon(
-                Icons.search,
-                color: AppColors.violet,
+              decoration: InputDecoration(
+                contentPadding: context.paddingHorizontalLow,
+                hintText: 'Search',
+                hintStyle: context.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.primary,
+                  fontSize: context.dynamicWidth(0.04),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: AppColors.fillColor,
+                prefixIcon: const Icon(
+                  Icons.search,
+                  color: AppColors.violet,
+                ),
               ),
             ),
           ),
-        ),
-        SizedBox(width: context.dynamicWidth(0.02)),
-        !bottomSheetVisible
-            ? GestureDetector(
-                onTap: showFilter,
-                child: Container(
-                  width: context.dynamicWidth(0.1),
-                  height: context.dynamicHeight(0.06),
-                  decoration: BoxDecoration(
-                    color: AppColors.violet,
-                    borderRadius: BorderRadius.circular(10),
+          SizedBox(width: context.dynamicWidth(0.02)),
+          !bottomSheetVisible
+              ? GestureDetector(
+                  onTap: showFilter,
+                  child: Container(
+                    width: context.dynamicHeight(0.06),
+                    height: context.dynamicHeight(0.06),
+                    decoration: BoxDecoration(
+                      color: AppColors.violet,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.filter_alt_outlined,
+                      color: AppColors.white,
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.filter_alt_outlined,
-                    color: AppColors.white,
+                )
+              : GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      bottomSheetVisible = false;
+                      page = 1;
+                      fetchData();
+                    });
+                  },
+                  child: Container(
+                    width: context.dynamicHeight(0.06),
+                    height: context.dynamicHeight(0.06),
+                    decoration: BoxDecoration(
+                      color: AppColors.violet,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      color: AppColors.white,
+                    ),
                   ),
                 ),
-              )
-            : GestureDetector(
-                onTap: () {
-                  setState(() {
-                    bottomSheetVisible = false;
-                    page = 1;
-                    fetchData();
-                  });
-                },
-                child: Container(
-                  width: context.dynamicWidth(0.1),
-                  height: context.dynamicHeight(0.06),
-                  decoration: BoxDecoration(
-                    color: AppColors.violet,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.close,
-                    color: AppColors.white,
-                  ),
-                ),
-              ),
-      ],
+        ],
+      ),
     );
   }
 
   showFilter() {
     showModalBottomSheet(
       context: context,
-      builder: (BuildContext context) {
-        return Container(
+      isScrollControlled: true,
+      builder: (BuildContext context) => Padding(
+        padding: MediaQuery.of(context).viewInsets,
+        child: Container(
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(25),
           ),
           padding: context.paddingAllDefault,
-          height: context.dynamicHeight(0.35),
+          height: context.dynamicHeight(0.32),
           child: Column(
             children: [
               Container(
@@ -250,54 +279,6 @@ class _ProductListState extends ConsumerState<ProductList> {
                   ),
                 ],
               ),
-              // SizedBox(height: context.dynamicHeight(0.02)),
-              // FutureBuilder<List<ProductModel>>(
-              //     future:
-              //         ref.read(productControllerProvider).getProducts(),
-              //     builder: (context, snapshot) {
-              //       if (snapshot.hasData) {
-              //         final products = snapshot.data!;
-              //         return Expanded(
-              //           child: ListView.builder(
-              //             scrollDirection: Axis.horizontal,
-              //             itemCount: products.length,
-              //             itemBuilder:
-              //                 (BuildContext context, int index) {
-              //               final item = products[index];
-              //               return Padding(
-              //                 padding: context.paddingHorizontalLow,
-              //                 child: GestureDetector(
-              //                   onTap: () {
-              //                     setState(() {
-              //                       brand = item.brand;
-              //                     });
-              //                     print(brand);
-              //                   },
-              //                   child: AnimatedContainer(
-              //                     height: context.dynamicHeight(0.04),
-              //                     duration:
-              //                         const Duration(milliseconds: 300),
-              //                     curve: Curves.easeIn,
-              //                     decoration: BoxDecoration(
-              //                       color: brand == item.brand
-              //                           ? AppColors.violet
-              //                           : AppColors.fillColor,
-              //                       borderRadius:
-              //                           BorderRadius.circular(10),
-              //                     ),
-              //                     padding: context.paddingAllLow,
-              //                     child: Text(item.brand!),
-              //                   ),
-              //                 ),
-              //               );
-              //             },
-              //           ),
-              //         );
-              //       }
-              //       return const Center(
-              //         child: CircularProgressIndicator(),
-              //       );
-              //     }),
               SizedBox(height: context.dynamicHeight(0.02)),
               Align(
                 alignment: Alignment.bottomCenter,
@@ -347,8 +328,8 @@ class _ProductListState extends ConsumerState<ProductList> {
               ),
             ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

@@ -7,12 +7,10 @@ class OrderInfo extends StatelessWidget {
   const OrderInfo({
     super.key,
     required this.cartSubtotal,
-    required this.cartDeliveryFee,
     required this.cartTotal,
   });
 
   final double cartSubtotal;
-  final double cartDeliveryFee;
   final double cartTotal;
 
   @override
@@ -27,29 +25,11 @@ class OrderInfo extends StatelessWidget {
               style: context.textTheme.bodyMedium?.copyWith(
                 fontSize: context.dynamicWidth(0.035),
                 color: AppColors.titleBlack,
+                fontWeight: FontWeight.w300,
               ),
             ),
             Text(
               "\$ ${cartSubtotal.toString()}",
-              style: context.textTheme.bodyMedium?.copyWith(
-                fontSize: context.dynamicWidth(0.035),
-                color: AppColors.titleBlack,
-              ),
-            ),
-          ],
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Delivery Fee",
-              style: context.textTheme.bodyMedium?.copyWith(
-                fontSize: context.dynamicWidth(0.035),
-                color: AppColors.titleBlack,
-              ),
-            ),
-            Text(
-              "\$ ${cartDeliveryFee.toString()}",
               style: context.textTheme.bodyMedium?.copyWith(
                 fontSize: context.dynamicWidth(0.035),
                 color: AppColors.titleBlack,
