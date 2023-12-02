@@ -12,6 +12,7 @@ void main() async {
   await Hive.initFlutter();
   await Hive.openBox('cart');
   await Hive.openBox('cartCount');
+  await Hive.openBox('favorites');
 
   runApp(const ProviderScope(child: MyApp()));
 }

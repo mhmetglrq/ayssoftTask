@@ -2,6 +2,8 @@ import 'package:flutter_product_app/core/models/product_model.dart';
 import 'package:flutter_product_app/features/product/repository/product_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/models/cart_item_model.dart';
+
 final productControllerProvider = Provider(
   (ref) => ProductController(
     productRepository: ref.watch(productRepositoryProvider),
@@ -33,5 +35,17 @@ class ProductController {
 
   int getCartProductCount() {
     return productRepository.getCartProductCount();
+  }
+
+  List<CartItemModel> getFavorites() {
+    return productRepository.getFavorites();
+  }
+
+  Future<void> addFavorite(ProductModel product) async {
+    return await productRepository.addFavorite(product);
+  }
+
+  Future<void> removeFavorite(String productId) async {
+    return await productRepository.removeFavorite(productId);
   }
 }

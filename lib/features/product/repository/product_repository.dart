@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_product_app/core/models/cart_item_model.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -127,5 +125,46 @@ class ProductRepository {
       debugPrint('Error: $e');
     }
     return 0;
+  }
+
+  List<CartItemModel> getFavorites() {
+    try {
+      final favoritesBox = Hive.box("favorites");
+      List<CartItemModel> favorites = [];
+      for (var i = 0; i < favoritesBox.length; i++) {
+        favorites.add(CartItemModel.fromMap(favoritesBox.getAt(i)));
+      }
+      return favorites;
+    } catch (e) {
+      debugPrint('Error: $e');
+    }
+    return [];
+  }
+
+  Future<void> addFavorite(ProductModel product) async {
+    try {
+      CartItemModel cartItemModel = CartItemModel(
+        id: product.id,
+        name: product.name,
+        image: product.image,
+        price: product.price,
+        quantity: 1,
+        brand: product.brand,
+        model: product.model,
+      );
+      final favoritesBox = Hive.box("favorites");
+      await favoritesBox.put(product.id, product.toMap());
+    } catch (e) {
+      debugPrint('Error: $e');
+    }
+  }
+
+  Future<void> removeFavorite(String cartItemId) async {
+    try {
+      final favoritesBox = Hive.box("favorites");
+      await favoritesBox.delete(cartItemId);
+    } catch (e) {
+      debugPrint('Error: $e');
+    }
   }
 }
