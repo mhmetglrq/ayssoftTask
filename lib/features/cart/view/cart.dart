@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_product_app/core/models/cart_item_model.dart';
@@ -119,7 +118,16 @@ class _CartState extends ConsumerState<Cart> {
               ),
               OrderInfo(cartSubtotal: cartSubtotal, cartTotal: cartTotal),
               VioletFilledButton(
-                onPressed: () async {},
+                onPressed: () async {
+                  var cartCountbox = Hive.box("cartCount");
+                  var cartBox = Hive.box("cart");
+                  await cartBox.clear();
+                  await cartCountbox.clear();
+                  ref.refresh(productControllerProvider).getCartProductCount();
+                  setState(() {
+                    isEmpty = true;
+                  });
+                },
                 title: "Checkout",
               ),
             ],
@@ -221,11 +229,6 @@ class _CartState extends ConsumerState<Cart> {
                                     .refresh(productControllerProvider)
                                     .getCartProductCount();
 
-                                var box = Hive.box("cartCount");
-                                for (var element in box.values) {
-                                  print(element);
-                                }
-
                                 cartSubtotal = cartSubtotal +
                                     (1) * double.parse(cartItem.price!);
                                 cartTotal = cartSubtotal;
@@ -237,8 +240,8 @@ class _CartState extends ConsumerState<Cart> {
                           ],
                         ),
                         IconButton(
-                          onPressed: () {
-                            ref
+                          onPressed: () async {
+                            await ref
                                 .refresh(cartControllerProvider)
                                 .deleteProductFromCart(cartItem.id!);
                             final count = ref
@@ -255,7 +258,6 @@ class _CartState extends ConsumerState<Cart> {
                                 isEmpty = true;
                               });
                             }
-                            print(isEmpty);
                           },
                           icon: SvgPicture.asset(
                             ImageConstants.delete.toSvg,

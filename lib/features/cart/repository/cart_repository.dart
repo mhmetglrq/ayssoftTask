@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:flutter_product_app/core/models/cart_item_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -67,8 +66,14 @@ class CartRepository {
       final cartBox = Hive.box("cart");
       final cartCountBox = Hive.box("cartCount");
       if (cartBox.length > 0 && cartBox.containsKey(cartItemId)) {
+        CartItemModel cartItem = CartItemModel.fromMap(cartBox.get(cartItemId));
+
         await cartBox.delete(cartItemId);
-        await cartCountBox.deleteAt(cartCountBox.length - 1);
+
+        for (var i = cartItem.quantity!; i > 0; i--) {
+          await cartCountBox.deleteAt(i - 1);
+        }
+
         return;
       }
     } catch (e) {

@@ -123,7 +123,9 @@ class ProductDetails extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const CustomAppbar(),
+                  CustomAppbar(
+                    product: product,
+                  ),
                   SizedBox(
                     width: context.dynamicWidth(1),
                     child: VioletFilledButton(

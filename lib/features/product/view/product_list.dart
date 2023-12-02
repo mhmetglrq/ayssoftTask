@@ -3,6 +3,7 @@ import 'package:flutter_product_app/config/extensions/context_extension.dart';
 import 'package:flutter_product_app/config/items/colors.dart';
 import 'package:flutter_product_app/core/models/product_model.dart';
 import 'package:flutter_product_app/features/cart/widget/left_title.dart';
+import 'package:flutter_product_app/features/product/widget/shimmer_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../controller/product_controller.dart';
@@ -108,7 +109,7 @@ class _ProductListState extends ConsumerState<ProductList> {
                       final product = products[index];
                       return ProductItemCard(product: product);
                     } else {
-                      return const Center(child: CircularProgressIndicator());
+                      return const ShimmerCard();
                     }
                   },
                 ),

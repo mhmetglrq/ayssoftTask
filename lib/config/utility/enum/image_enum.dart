@@ -11,6 +11,7 @@ enum ImageConstants {
   visa('visa'),
   emptyBag("empty_bag"),
   empty('empty'),
+  heart('heart'),
   ;
 
   final String value;
