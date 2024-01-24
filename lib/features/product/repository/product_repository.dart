@@ -20,7 +20,7 @@ class ProductRepository {
     List<ProductModel> products = [];
     try {
       final response = await dio.get(
-        '${Constants.productApiBaseUrl}/products${page != null ? '?completed=false&page=$page&limit=$limit' : ''}',
+        '${Constants.productApiBaseUrl}/products',
       );
       if (response.statusCode == 200) {
         final responseData = response.data;
@@ -143,15 +143,7 @@ class ProductRepository {
 
   Future<void> addFavorite(ProductModel product) async {
     try {
-      CartItemModel cartItemModel = CartItemModel(
-        id: product.id,
-        name: product.name,
-        image: product.image,
-        price: product.price,
-        quantity: 1,
-        brand: product.brand,
-        model: product.model,
-      );
+
       final favoritesBox = Hive.box("favorites");
       await favoritesBox.put(product.id, product.toMap());
     } catch (e) {

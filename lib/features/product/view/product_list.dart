@@ -132,6 +132,10 @@ class _ProductListState extends ConsumerState<ProductList> {
               onChanged: (query) {
                 setState(
                   () {
+
+                  
+                    
+
                     ref
                         .read(productControllerProvider)
                         .searchProducts(query)

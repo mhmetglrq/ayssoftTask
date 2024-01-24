@@ -3,16 +3,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_product_app/config/routes/route_names.dart';
 import 'package:flutter_product_app/core/models/cart_item_model.dart';
-import 'package:flutter_product_app/features/cart/widget/delivery_address.dart';
 import 'package:flutter_product_app/features/favorites/controller/favorites_controller.dart';
 import 'package:flutter_product_app/features/product/controller/product_controller.dart';
-import 'package:flutter_product_app/features/product/widget/violet_filled_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:flutter_product_app/config/extensions/context_extension.dart';
 import 'package:flutter_product_app/config/utility/enum/image_enum.dart';
-import 'package:lottie/lottie.dart';
 
 import '../../../config/items/colors.dart';
 import '../widget/empty_widget.dart';

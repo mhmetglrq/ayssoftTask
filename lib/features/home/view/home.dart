@@ -34,8 +34,8 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
+      canPop: false,
       child: Scaffold(
         body: bottomNavigationItems[currentIndex],
         bottomNavigationBar: BottomNavigationBar(

@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_product_app/config/extensions/context_extension.dart';
 import 'package:flutter_product_app/config/routes/route_names.dart';
